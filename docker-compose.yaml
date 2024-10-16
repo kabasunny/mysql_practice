@@ -1,20 +1,19 @@
 version: "3.8"
-
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql_db
+    container_name: mysql
     ports:
-      - "3306:3306"
+      - 3306:3306
     volumes:
       - ./docker/mysql/init.d:/docker-entrypoint-initdb.d
-      - ./docker/mysql/pgdata:/var/lib/mysql
+      - ./docker/mysql/data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root_zenpass
       MYSQL_DATABASE: zeninv
       MYSQL_USER: zeninvestor
       MYSQL_PASSWORD: zenpass
-    hostname: mysql_db
+    hostname: mysql
     restart: always
     user: root
 
@@ -23,12 +22,11 @@ services:
     container_name: phpmyadmin
     restart: always
     ports:
-      - "86:80"
+      - 86:80
     environment:
       PMA_HOST: mysql
+      PMA_PORT: 3306
       PMA_USER: zeninvestor
       PMA_PASSWORD: zenpass
-    volumes:
-      - ./docker/pgadmin:/var/lib/phpmyadmin
     depends_on:
       - mysql

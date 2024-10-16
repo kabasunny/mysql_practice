@@ -1,49 +1,45 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
+// ユーザーデータを格納するテーブル用の構造体を定義
 type User struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID       uint   `gorm:"primaryKey"`
+	Name     string `gorm:"size:100"`
+	Email    string `gorm:"uniqueIndex;size:100"`
+	Password string `gorm:"size:255"`
 }
 
 func main() {
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbName := os.Getenv("DB_NAME")
-	dbPort := os.Getenv("DB_PORT")
-
-	// 環境変数のログ出力
-	log.Printf("DB_USER: %s, DB_PASSWORD: %s, DB_HOST: %s, DB_NAME: %s, DB_PORT: %s", dbUser, dbPassword, dbHost, dbName, dbPort)
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dbUser, dbPassword, dbHost, dbPort, dbName)
+	// MySQLへの接続情報
+	dsn := "zeninvestor:zenpass@tcp(localhost:3306)/zeninv?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("Failed to connect to database")
+		log.Fatal("failed to connect to database:", err)
 	}
 
+	// テーブルの自動マイグレーション
 	db.AutoMigrate(&User{})
 
-	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "pong"})
-	})
-	router.GET("/users", func(c *gin.Context) {
-		var users []User
-		db.Find(&users)
-		c.JSON(http.StatusOK, users)
-	})
+	// ユーザーデータを作成
+	users := []User{
+		{Name: "Alice", Email: "alice@example.com", Password: "password1"},
+		{Name: "Bob", Email: "bob@example.com", Password: "password2"},
+		{Name: "Charlie", Email: "charlie@example.com", Password: "password3"},
+	}
 
-	router.Run(":8080")
+	// ユーザーデータをデータベースに追加
+	for _, user := range users {
+		result := db.Create(&user)
+		if result.Error != nil {
+			log.Fatalf("Failed to insert user: %v", result.Error)
+		}
+	}
+
+	log.Println("Database connected and User table migrated successfully. Users added.")
 }
