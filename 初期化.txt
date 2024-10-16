@@ -1,4 +1,4 @@
-C:\Users\kabas\Documents\APP\test\mysql_practice\docker\mysql\init.d\init.sql
+\docker\mysql\init.d\init.sql
 
 に
 
