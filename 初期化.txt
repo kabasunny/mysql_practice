@@ -1,0 +1,5 @@
+C:\Users\kabas\Documents\APP\test\mysql_practice\docker\mysql\init.d\init.sql
+
+に
+
+init.sqlをいれる
